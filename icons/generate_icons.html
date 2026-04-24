@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head><title>Icon Generator</title></head>
+<body>
+<canvas id="c128" width="128" height="128"></canvas>
+<canvas id="c48" width="48" height="48"></canvas>
+<canvas id="c16" width="16" height="16"></canvas>
+<script>
+const sizes = [
+  { id: 'c128', size: 128 },
+  { id: 'c48',  size: 48 },
+  { id: 'c16',  size: 16 },
+];
+
+const svgTemplate = (size) => {
+  const r = size * 0.22;     // corner radius of bg
+  const micW = size * 0.25;
+  const micH = size * 0.34;
+  const micX = (size - micW) / 2;
+  const micY = size * 0.16;
+  const micRx = micW / 2;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c6aff"/>
+      <stop offset="100%" style="stop-color:#a06aff"/>
+    </linearGradient>
+  </defs>
+  <rect width="${size}" height="${size}" rx="${r}" fill="url(#bg)"/>
+  <rect x="${micX}" y="${micY}" width="${micW}" height="${micH}" rx="${micRx}" fill="white"/>
+  <path d="M${size*0.25} ${size*0.53} Q${size*0.25} ${size*0.75} ${size*0.5} ${size*0.75} Q${size*0.75} ${size*0.75} ${size*0.75} ${size*0.53}" stroke="white" stroke-width="${size*0.047}" fill="none" stroke-linecap="round"/>
+  <line x1="${size*0.5}" y1="${size*0.75}" x2="${size*0.5}" y2="${size*0.875}" stroke="white" stroke-width="${size*0.047}" stroke-linecap="round"/>
+  <line x1="${size*0.375}" y1="${size*0.875}" x2="${size*0.625}" y2="${size*0.875}" stroke="white" stroke-width="${size*0.047}" stroke-linecap="round"/>
+</svg>`;
+};
+
+sizes.forEach(({ id, size }) => {
+  const canvas = document.getElementById(id);
+  const ctx = canvas.getContext('2d');
+  const svgStr = svgTemplate(size);
+  const blob = new Blob([svgStr], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.onload = () => {
+    ctx.drawImage(img, 0, 0);
+    URL.revokeObjectURL(url);
+    const link = document.createElement('a');
+    link.download = `icon${size}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.textContent = `Download icon${size}.png`;
+    link.style.display = 'block';
+    link.style.margin = '8px';
+    document.body.appendChild(link);
+    // Auto-trigger download
+    link.click();
+  };
+  img.src = url;
+});
+</script>
+<p style="font-family:sans-serif;padding:8px">Icons will auto-download. Place them in the <code>icons/</code> folder.</p>
+</body>
+</html>

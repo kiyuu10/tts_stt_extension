@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TTS &amp; STT Assistant</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-logo">
+        <div class="logo-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 1C8.676 1 6 3.676 6 7v6c0 3.324 2.676 6 6 6s6-2.676 6-6V7c0-3.324-2.676-6-6-6z" fill="currentColor"/>
+            <path d="M19 11v2a7 7 0 01-14 0v-2H3v2a9 9 0 008 8.941V23h2v-1.059A9 9 0 0021 13v-2h-2z" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="logo-text">TTS &amp; STT</span>
+      </div>
+      <div class="header-actions">
+        <button id="btn-open-options" class="icon-btn" title="Settings" aria-label="Open Settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" fill="currentColor"/>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.33 2.38a.75.75 0 01.74-.63h3.86c.36 0 .67.25.74.63l.34 1.98c.5.18.97.42 1.41.7l1.85-.87a.75.75 0 01.93.22l1.93 3.34a.75.75 0 01-.17.98l-1.6 1.22c.04.33.06.67.06 1.01s-.02.68-.06 1.01l1.6 1.22a.75.75 0 01.17.98l-1.93 3.34a.75.75 0 01-.93.22l-1.85-.87c-.44.28-.91.52-1.41.7l-.34 1.98a.75.75 0 01-.74.63h-3.86a.75.75 0 01-.74-.63l-.34-1.98a6.75 6.75 0 01-1.41-.7l-1.85.87a.75.75 0 01-.93-.22L2.12 14.8a.75.75 0 01.17-.98l1.6-1.22A6.77 6.77 0 013.83 12c0-.34.02-.68.06-1.01L2.29 9.77a.75.75 0 01-.17-.98l1.93-3.34a.75.75 0 01.93-.22l1.85.87c.44-.28.91-.52 1.41-.7l.34-1.98z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Status Banner -->
+    <div id="status-banner" class="status-banner hidden" role="alert" aria-live="polite"></div>
+
+    <!-- API Key Warning -->
+    <div id="api-key-warning" class="api-key-warning hidden">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 20h20L12 2z" fill="currentColor" opacity="0.2"/>
+        <path d="M12 9v5M12 16.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M12 2L2 20h20L12 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+      <span>No API key found. <button id="btn-go-to-options" class="link-btn">Open Settings</button> to add your Google API key.</span>
+    </div>
+
+    <!-- Tab Navigation -->
+    <nav class="tab-nav" role="tablist">
+      <button class="tab-btn active" id="tab-tts" role="tab" aria-selected="true" aria-controls="panel-tts" data-tab="tts">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 8h18M7 12h10M10 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Text to Speech
+      </button>
+      <button class="tab-btn" id="tab-stt" role="tab" aria-selected="false" aria-controls="panel-stt" data-tab="stt">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 1C8.676 1 6 3.676 6 7v6c0 3.324 2.676 6 6 6s6-2.676 6-6V7c0-3.324-2.676-6-6-6z" fill="currentColor"/>
+          <path d="M19 11v2a7 7 0 01-14 0v-2H3v2a9 9 0 008 8.941V23h2v-1.059A9 9 0 0021 13v-2h-2z" fill="currentColor"/>
+        </svg>
+        Speech to Text
+      </button>
+    </nav>
+
+    <!-- TTS Panel -->
+    <section id="panel-tts" class="tab-panel active" role="tabpanel" aria-labelledby="tab-tts">
+      <div class="panel-content">
+        <!-- Input area -->
+        <div class="input-group">
+          <label for="tts-text" class="input-label">Text to speak</label>
+          <div class="textarea-wrapper">
+            <textarea
+              id="tts-text"
+              class="text-input"
+              placeholder="Type or paste text here, or select text on a page and click 'Grab Selected'…"
+              rows="5"
+              aria-label="Text to convert to speech"
+              maxlength="5000"
+            ></textarea>
+            <div class="char-counter"><span id="tts-char-count">0</span> / 5000</div>
+          </div>
+          <button id="btn-grab-selected" class="secondary-btn grab-btn" title="Import selected text from the current page">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Grab Selected Text
+          </button>
+        </div>
+
+        <!-- Voice settings -->
+        <div class="settings-row">
+          <div class="select-group">
+            <label for="tts-voice" class="input-label">Voice</label>
+            <select id="tts-voice" class="select-input" aria-label="Select TTS voice">
+              <option value="Kore">Kore (Default)</option>
+              <option value="Puck">Puck</option>
+              <option value="Charon">Charon</option>
+              <option value="Fenrir">Fenrir</option>
+              <option value="Aoede">Aoede</option>
+            </select>
+          </div>
+          <div class="select-group">
+            <label for="tts-model" class="input-label">Model</label>
+            <select id="tts-model" class="select-input" aria-label="Select TTS model">
+              <option value="gemini-2.5-flash-preview-tts">Gemini 2.5 Flash TTS</option>
+              <option value="gemini-2.5-pro-preview-tts">Gemini 2.5 Pro TTS</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Audio Player -->
+        <div id="audio-player-container" class="audio-player hidden" aria-label="Audio player">
+          <div class="audio-player-inner">
+            <button id="btn-play-pause" class="play-btn" aria-label="Play/Pause audio">
+              <svg id="icon-play" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+              <svg id="icon-pause" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="hidden">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+              </svg>
+            </button>
+            <div class="audio-progress-container">
+              <div class="audio-waveform" id="audio-waveform" aria-hidden="true">
+                <div class="wave-bars">
+                  <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                  <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                  <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                  <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                  <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                </div>
+              </div>
+              <div class="audio-time">
+                <span id="audio-current-time">0:00</span>
+                <span class="time-separator">/</span>
+                <span id="audio-duration">0:00</span>
+              </div>
+            </div>
+            <input type="range" id="audio-seek" class="seek-bar" min="0" max="100" value="0" aria-label="Seek audio position" />
+          </div>
+          <audio id="tts-audio" aria-hidden="true"></audio>
+        </div>
+
+        <!-- Speak action -->
+        <div class="action-row">
+          <button id="btn-speak" class="primary-btn" aria-label="Convert text to speech">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 8h18M7 12h10M10 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span id="btn-speak-label">Speak</span>
+          </button>
+          <button id="btn-stop-tts" class="danger-btn hidden" aria-label="Stop speech">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="4" width="16" height="16" rx="2"/>
+            </svg>
+            Stop
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STT Panel -->
+    <section id="panel-stt" class="tab-panel" role="tabpanel" aria-labelledby="tab-stt">
+      <div class="panel-content">
+        <!-- Recording area -->
+        <div class="record-area">
+          <div class="record-visual" id="record-visual" aria-hidden="true">
+            <div class="record-rings">
+              <span class="ring ring-1"></span>
+              <span class="ring ring-2"></span>
+              <span class="ring ring-3"></span>
+            </div>
+            <div class="mic-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 1C8.676 1 6 3.676 6 7v6c0 3.324 2.676 6 6 6s6-2.676 6-6V7c0-3.324-2.676-6-6-6z" fill="currentColor"/>
+                <path d="M19 11v2a7 7 0 01-14 0v-2H3v2a9 9 0 008 8.941V23h2v-1.059A9 9 0 0021 13v-2h-2z" fill="currentColor"/>
+              </svg>
+            </div>
+          </div>
+          <div class="record-status">
+            <span id="record-status-text">Ready to record</span>
+            <span id="record-timer" class="record-timer hidden">00:00</span>
+          </div>
+          <div class="record-controls">
+            <button id="btn-record" class="record-btn" aria-label="Start recording">
+              Start Recording
+            </button>
+            <button id="btn-stop-record" class="secondary-btn hidden" aria-label="Stop recording">
+              Stop
+            </button>
+          </div>
+        </div>
+
+        <!-- Language and model settings -->
+        <div class="settings-row">
+          <div class="select-group">
+            <label for="stt-language" class="input-label">Language</label>
+            <select id="stt-language" class="select-input" aria-label="Select STT language">
+              <option value="en-US">English (US)</option>
+              <option value="en-GB">English (UK)</option>
+              <option value="vi-VN">Vietnamese</option>
+              <option value="ja-JP">Japanese</option>
+              <option value="ko-KR">Korean</option>
+              <option value="zh-CN">Chinese (Simplified)</option>
+              <option value="es-ES">Spanish</option>
+              <option value="fr-FR">French</option>
+              <option value="de-DE">German</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Transcript area -->
+        <div class="transcript-area">
+          <div class="transcript-header">
+            <label class="input-label">Transcript</label>
+            <div class="transcript-actions">
+              <button id="btn-copy-transcript" class="icon-text-btn" title="Copy transcript" aria-label="Copy transcript to clipboard">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                Copy
+              </button>
+              <button id="btn-clear-transcript" class="icon-text-btn" title="Clear transcript" aria-label="Clear transcript">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Clear
+              </button>
+            </div>
+          </div>
+          <div
+            id="transcript-output"
+            class="transcript-output"
+            role="log"
+            aria-live="polite"
+            aria-label="Transcription output"
+          ><span class="placeholder-text">Transcript will appear here after recording…</span></div>
+        </div>
+
+        <!-- Insert to page -->
+        <div class="action-row">
+          <button id="btn-insert-transcript" class="secondary-btn" aria-label="Insert transcript into the focused input on the page">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Insert to Page
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <span class="footer-text">API calls are made directly to Google • Keys stored locally</span>
+    </footer>
+  </div>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TTS &amp; STT — Settings</title>
+  <link rel="stylesheet" href="options.css" />
+</head>
+<body>
+  <div class="options-app">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 1C8.676 1 6 3.676 6 7v6c0 3.324 2.676 6 6 6s6-2.676 6-6V7c0-3.324-2.676-6-6-6z" fill="currentColor"/>
+            <path d="M19 11v2a7 7 0 01-14 0v-2H3v2a9 9 0 008 8.941V23h2v-1.059A9 9 0 0021 13v-2h-2z" fill="currentColor"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="sidebar-title">TTS &amp; STT</h1>
+          <p class="sidebar-subtitle">Settings</p>
+        </div>
+      </div>
+
+      <ul class="sidebar-nav">
+        <li><a href="#section-api" class="nav-link active" data-section="api">API Keys</a></li>
+        <li><a href="#section-tts" class="nav-link" data-section="tts">Text to Speech</a></li>
+        <li><a href="#section-stt" class="nav-link" data-section="stt">Speech to Text</a></li>
+        <li><a href="#section-about" class="nav-link" data-section="about">About</a></li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <button id="btn-reset-all" class="danger-outline-btn">Reset All Settings</button>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="options-main">
+      <div id="save-banner" class="save-banner hidden" role="alert" aria-live="polite"></div>
+
+      <!-- API Keys Section -->
+      <section id="section-api" class="options-section active" aria-label="API Key Settings">
+        <div class="section-header">
+          <h2 class="section-title">API Keys</h2>
+          <p class="section-desc">
+            Your keys are stored locally in your browser using <code>chrome.storage.local</code>.
+            They are never transmitted to any server other than Google's APIs.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="field-group">
+            <label for="api-key" class="field-label">
+              Google API Key
+              <span class="badge required">Required</span>
+            </label>
+            <p class="field-hint">
+              Used for both Gemini TTS and (optionally) Gemini STT.
+              Get your key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="ext-link">Google AI Studio</a>.
+            </p>
+            <div class="input-wrapper">
+              <input
+                type="password"
+                id="api-key"
+                class="field-input"
+                placeholder="AIza…"
+                autocomplete="off"
+                spellcheck="false"
+                aria-describedby="api-key-hint"
+              />
+              <button type="button" id="btn-toggle-key" class="show-hide-btn" aria-label="Toggle API key visibility">Show</button>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="cloud-api-key" class="field-label">
+              Google Cloud API Key
+              <span class="badge optional">Optional</span>
+            </label>
+            <p class="field-hint">
+              Required only for Google Cloud Speech-to-Text (STT).
+              Leave blank to use Gemini multimodal STT instead.
+              Get this from the <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener" class="ext-link">Google Cloud Console</a>.
+            </p>
+            <div class="input-wrapper">
+              <input
+                type="password"
+                id="cloud-api-key"
+                class="field-input"
+                placeholder="AIza… (Cloud key)"
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <button type="button" id="btn-toggle-cloud-key" class="show-hide-btn" aria-label="Toggle Cloud API key visibility">Show</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TTS Section -->
+      <section id="section-tts" class="options-section" aria-label="TTS Settings">
+        <div class="section-header">
+          <h2 class="section-title">Text to Speech</h2>
+          <p class="section-desc">Configure default voice and model settings for Text-to-Speech.</p>
+        </div>
+
+        <div class="card">
+          <div class="field-group">
+            <label for="default-voice" class="field-label">Default Voice</label>
+            <p class="field-hint">The voice used when speaking text. Can be overridden in the popup.</p>
+            <select id="default-voice" class="field-select" aria-label="Default TTS voice">
+              <option value="Kore">Kore (Default — versatile)</option>
+              <option value="Puck">Puck (upbeat)</option>
+              <option value="Charon">Charon (informational)</option>
+              <option value="Fenrir">Fenrir (excitable)</option>
+              <option value="Aoede">Aoede (breezy)</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label for="default-tts-model" class="field-label">Default TTS Model</label>
+            <select id="default-tts-model" class="field-select" aria-label="Default TTS model">
+              <option value="gemini-2.5-flash-preview-tts">Gemini 2.5 Flash TTS (fast, recommended)</option>
+              <option value="gemini-2.5-pro-preview-tts">Gemini 2.5 Pro TTS (higher quality)</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label for="max-tts-chars" class="field-label">Max characters per request</label>
+            <input
+              type="number"
+              id="max-tts-chars"
+              class="field-input narrow"
+              value="5000"
+              min="100"
+              max="10000"
+              aria-label="Maximum characters for TTS"
+            />
+            <p class="field-hint">Limit text length sent in a single TTS request.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- STT Section -->
+      <section id="section-stt" class="options-section" aria-label="STT Settings">
+        <div class="section-header">
+          <h2 class="section-title">Speech to Text</h2>
+          <p class="section-desc">Configure default language and transcription settings.</p>
+        </div>
+
+        <div class="card">
+          <div class="field-group">
+            <label class="field-label">Microphone Permission</label>
+            <p class="field-hint">Required for recording audio in the extension popup.</p>
+            <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+              <button type="button" id="btn-request-mic" class="secondary-btn">Grant Permission</button>
+              <span id="mic-status-badge" class="badge">Checking...</span>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="default-stt-language" class="field-label">Default Language</label>
+            <select id="default-stt-language" class="field-select" aria-label="Default STT language">
+              <option value="en-US">English (US)</option>
+              <option value="en-GB">English (UK)</option>
+              <option value="vi-VN">Vietnamese</option>
+              <option value="ja-JP">Japanese</option>
+              <option value="ko-KR">Korean</option>
+              <option value="zh-CN">Chinese (Simplified)</option>
+              <option value="es-ES">Spanish</option>
+              <option value="fr-FR">French</option>
+              <option value="de-DE">German</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">STT Engine</label>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input type="radio" name="stt-engine" id="stt-engine-gemini" value="gemini" checked />
+                <span class="radio-label">
+                  <strong>Gemini multimodal</strong>
+                  <span class="radio-desc">Uses your Gemini API key. No extra setup needed.</span>
+                </span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="stt-engine" id="stt-engine-cloud" value="cloud" />
+                <span class="radio-label">
+                  <strong>Google Cloud Speech-to-Text</strong>
+                  <span class="radio-desc">Higher accuracy. Requires a Google Cloud API key above.</span>
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- About Section -->
+      <section id="section-about" class="options-section" aria-label="About">
+        <div class="section-header">
+          <h2 class="section-title">About</h2>
+          <p class="section-desc">Extension information and privacy notes.</p>
+        </div>
+
+        <div class="card about-card">
+          <div class="about-logo">
+            <div class="logo-icon-lg">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 1C8.676 1 6 3.676 6 7v6c0 3.324 2.676 6 6 6s6-2.676 6-6V7c0-3.324-2.676-6-6-6z" fill="currentColor"/>
+                <path d="M19 11v2a7 7 0 01-14 0v-2H3v2a9 9 0 008 8.941V23h2v-1.059A9 9 0 0021 13v-2h-2z" fill="currentColor"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="about-name">TTS &amp; STT Assistant</h3>
+              <p class="about-version">Version 1.0.0 — Manifest V3</p>
+            </div>
+          </div>
+
+          <div class="info-list">
+            <div class="info-item">
+              <span class="info-icon">🔒</span>
+              <div>
+                <strong>Privacy</strong>
+                <p>Your API keys are stored locally using <code>chrome.storage.local</code> and are never sent to any server other than Google's APIs. No data is collected by this extension.</p>
+              </div>
+            </div>
+            <div class="info-item">
+              <span class="info-icon">🌐</span>
+              <div>
+                <strong>API Calls</strong>
+                <p>All API calls go directly from your browser to Google's endpoints. There is no intermediate backend server.</p>
+              </div>
+            </div>
+            <div class="info-item">
+              <span class="info-icon">⚠️</span>
+              <div>
+                <strong>CORS / CSP Notes</strong>
+                <p>The extension uses <code>host_permissions</code> to allow direct calls to Google APIs from the service worker, bypassing typical CORS restrictions. This is safe since only your browser makes these calls.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Save / Cancel Bar -->
+      <div class="options-actions">
+        <button id="btn-save" class="primary-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17 21v-8H7v8M7 3v5h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Save Settings
+        </button>
+        <button id="btn-cancel" class="secondary-btn">Cancel</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="options.js" type="module"></script>
+</body>
+</html>
