@@ -11,8 +11,8 @@ A **fully client-side** Chrome Extension (Manifest V3) for Text-to-Speech and Sp
 
 ## Folder Structure
 
-```
-chrome-extension/
+```text
+tts_stt_extension/
 ├── manifest.json          # Manifest V3 config
 ├── popup.html             # Main extension popup
 ├── popup.js               # Popup controller
@@ -49,7 +49,7 @@ chrome-extension/
 1. Open Chrome and navigate to `chrome://extensions/`
 2. Enable **Developer mode** (top-right toggle)
 3. Click **Load unpacked**
-4. Select the `chrome-extension/` folder from this project
+4. Select the project folder (the directory containing `manifest.json`)
 
 ### 2. Configure Your API Key
 
@@ -137,12 +137,8 @@ If you only have a Gemini API key, the extension uses `gemini-2.0-flash` with au
 No build step required. The extension uses plain ES modules (`type="module"`).
 
 To make changes:
-1. Edit files in `chrome-extension/`
+1. Edit files in the project directory
 2. Go to `chrome://extensions/` and click the **Refresh** icon on the extension card
 3. Test in the popup or options page
 
----
 
-## License
-
-MIT — feel free to fork, extend, and adapt for your own use.
