@@ -31,13 +31,13 @@ const SPEECH_API_URL = 'https://speech.googleapis.com/v1/speech:recognize';
  */
 export async function sttTranscribe(payload, settings) {
   const { audioBase64, language = 'en-US' } = payload;
-  const { apiKey, cloudApiKey } = settings;
+  const { apiKey, cloudApiKey, useGeminiSTT } = settings;
 
   if (!audioBase64) {
     return buildErrorResponse('No audio data provided.');
   }
 
-  if (cloudApiKey != '') {
+  if (cloudApiKey != '' && !useGeminiSTT) {
     return await transcribeWithSpeechAPI(audioBase64, language, cloudApiKey);
   }
 
@@ -76,11 +76,11 @@ async function transcribeWithSpeechAPI(audioBase64, language, apiKey) {
 
   if (!rawResponse.ok) {
     const errBody = await rawResponse.json().catch(() => ({}));
-    const apiMsg  = errBody?.error?.message || `HTTP ${rawResponse.status}`;
+    const apiMsg = errBody?.error?.message || `HTTP ${rawResponse.status}`;
     const apiStatus = errBody?.error?.status;
     console.error('[STT] Speech API error:', apiStatus, apiMsg);
 
-    return buildErrorResponse(apiMsg+apiKey);
+    return buildErrorResponse(apiMsg + apiKey);
   }
 
   const json = await rawResponse.json();
@@ -145,7 +145,7 @@ async function transcribeWithGemini(audioBase64, language, apiKey) {
 
   if (!rawResponse.ok) {
     const errBody = await rawResponse.json().catch(() => ({}));
-    const apiMsg  = errBody?.error?.message || `HTTP ${rawResponse.status}`;
+    const apiMsg = errBody?.error?.message || `HTTP ${rawResponse.status}`;
     return buildErrorResponse(`Gemini STT error: ${apiMsg}`);
   }
 

@@ -76,12 +76,21 @@
             ></textarea>
             <div class="char-counter"><span id="tts-char-count">0</span> / 5000</div>
           </div>
-          <button id="btn-grab-selected" class="secondary-btn grab-btn" title="Import selected text from the current page">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Grab Selected Text
-          </button>
+          <div class="action-row" style="margin-top: 4px;">
+            <button id="btn-grab-selected" class="secondary-btn grab-btn" title="Import selected text from the current page">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Grab Selected Text
+            </button>
+            <button id="btn-import-text" class="secondary-btn grab-btn" title="Import text from a file">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Import Text File
+            </button>
+            <input type="file" id="file-import-text" accept=".txt,.md,.json,.csv,.js,.html" class="hidden" />
+          </div>
         </div>
 
         <!-- Voice settings -->
@@ -184,6 +193,13 @@
             <button id="btn-stop-record" class="secondary-btn hidden" aria-label="Stop recording">
               Stop
             </button>
+            <button id="btn-import-audio" class="secondary-btn" aria-label="Import audio file">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Import Audio
+            </button>
+            <input type="file" id="file-import-audio" accept="audio/*" class="hidden" />
           </div>
         </div>
 

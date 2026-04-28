@@ -12,52 +12,57 @@
 import { showStatus, hideStatus, setButtonLoading, resetButton, formatTime } from './utils.js';
 
 // ─── DOM References ────────────────────────────────────────────────
-const btnOpenOptions   = document.getElementById('btn-open-options');
-const btnGoToOptions   = document.getElementById('btn-go-to-options');
-const apiKeyWarning    = document.getElementById('api-key-warning');
-const statusBanner     = document.getElementById('status-banner');
+const btnOpenOptions = document.getElementById('btn-open-options');
+const btnGoToOptions = document.getElementById('btn-go-to-options');
+const apiKeyWarning = document.getElementById('api-key-warning');
+const statusBanner = document.getElementById('status-banner');
 
 // Tabs
-const tabBtns   = document.querySelectorAll('.tab-btn');
+const tabBtns = document.querySelectorAll('.tab-btn');
 const tabPanels = document.querySelectorAll('.tab-panel');
 
 // TTS
-const ttsText          = document.getElementById('tts-text');
-const ttsCharCount     = document.getElementById('tts-char-count');
-const ttsVoice         = document.getElementById('tts-voice');
-const ttsModel         = document.getElementById('tts-model');
-const btnGrabSelected  = document.getElementById('btn-grab-selected');
-const btnSpeak         = document.getElementById('btn-speak');
-const btnSpeakLabel    = document.getElementById('btn-speak-label');
-const btnStopTts       = document.getElementById('btn-stop-tts');
+const ttsText = document.getElementById('tts-text');
+const ttsCharCount = document.getElementById('tts-char-count');
+const ttsVoice = document.getElementById('tts-voice');
+const ttsModel = document.getElementById('tts-model');
+const btnGrabSelected = document.getElementById('btn-grab-selected');
+const btnImportText = document.getElementById('btn-import-text');
+const fileImportText = document.getElementById('file-import-text');
+const btnSpeak = document.getElementById('btn-speak');
+const btnSpeakLabel = document.getElementById('btn-speak-label');
+const btnStopTts = document.getElementById('btn-stop-tts');
 const audioPlayerContainer = document.getElementById('audio-player-container');
-const audioEl          = document.getElementById('tts-audio');
-const btnPlayPause     = document.getElementById('btn-play-pause');
-const iconPlay         = document.getElementById('icon-play');
-const iconPause        = document.getElementById('icon-pause');
-const audioDuration    = document.getElementById('audio-duration');
+const audioEl = document.getElementById('tts-audio');
+const btnPlayPause = document.getElementById('btn-play-pause');
+const iconPlay = document.getElementById('icon-play');
+const iconPause = document.getElementById('icon-pause');
+const audioDuration = document.getElementById('audio-duration');
 const audioCurrentTime = document.getElementById('audio-current-time');
-const audioSeek        = document.getElementById('audio-seek');
+const audioSeek = document.getElementById('audio-seek');
 
 // STT
-const btnRecord        = document.getElementById('btn-record');
-const btnStopRecord    = document.getElementById('btn-stop-record');
-const recordVisual     = document.getElementById('record-visual');
+const btnRecord = document.getElementById('btn-record');
+const btnStopRecord = document.getElementById('btn-stop-record');
+const btnImportAudio = document.getElementById('btn-import-audio');
+const fileImportAudio = document.getElementById('file-import-audio');
+const recordVisual = document.getElementById('record-visual');
 const recordStatusText = document.getElementById('record-status-text');
-const recordTimer      = document.getElementById('record-timer');
-const sttLanguage      = document.getElementById('stt-language');
+const recordTimer = document.getElementById('record-timer');
+const sttLanguage = document.getElementById('stt-language');
 const transcriptOutput = document.getElementById('transcript-output');
-const btnCopyTranscript   = document.getElementById('btn-copy-transcript');
-const btnClearTranscript  = document.getElementById('btn-clear-transcript');
+const btnCopyTranscript = document.getElementById('btn-copy-transcript');
+const btnClearTranscript = document.getElementById('btn-clear-transcript');
 const btnInsertTranscript = document.getElementById('btn-insert-transcript');
 
 // ─── State ─────────────────────────────────────────────────────────
-let mediaRecorder   = null;
-let audioChunks     = [];
-let recordInterval  = null;
-let recordSeconds   = 0;
+let mediaRecorder = null;
+let audioChunks = [];
+let recordInterval = null;
+let recordSeconds = 0;
 let currentTranscript = '';
-let isSpeaking      = false;
+let isSpeaking = false;
+let maxTtsChars = 5000;
 
 // ─── Init ──────────────────────────────────────────────────────────
 (async function init() {
@@ -83,6 +88,11 @@ async function loadSavedPreferences() {
   if (settings.ttsVoice) ttsVoice.value = settings.ttsVoice;
   if (settings.ttsModel) ttsModel.value = settings.ttsModel;
   if (settings.sttLanguage) sttLanguage.value = settings.sttLanguage;
+  if (settings.maxTtsChars) {
+    maxTtsChars = parseInt(settings.maxTtsChars, 10) || 5000;
+    ttsText.maxLength = maxTtsChars;
+    ttsCharCount.nextSibling.textContent = ` / ${maxTtsChars}`;
+  }
 }
 
 // ─── Options Navigation ────────────────────────────────────────────
@@ -143,6 +153,28 @@ btnGrabSelected.addEventListener('click', async () => {
   }
 });
 
+// ─── Import Text File ──────────────────────────────────────────────
+btnImportText.addEventListener('click', () => {
+  fileImportText.click();
+});
+
+fileImportText.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    ttsText.value = e.target.result.slice(0, maxTtsChars); // Max chars based on settings
+    ttsCharCount.textContent = ttsText.value.length;
+    showStatus(statusBanner, 'success', 'Text file imported!');
+  };
+  reader.onerror = () => {
+    showStatus(statusBanner, 'error', 'Failed to read file.');
+  };
+  reader.readAsText(file);
+  fileImportText.value = ''; // Reset input
+});
+
 // ─── TTS: Speak ────────────────────────────────────────────────────
 btnSpeak.addEventListener('click', async () => {
   const text = ttsText.value.trim();
@@ -150,8 +182,8 @@ btnSpeak.addEventListener('click', async () => {
     showStatus(statusBanner, 'error', 'Please enter some text to speak.');
     return;
   }
-  if (text.length > 5000) {
-    showStatus(statusBanner, 'error', 'Text too long. Keep it under 5000 characters.');
+  if (text.length > maxTtsChars) {
+    showStatus(statusBanner, 'error', `Text too long. Keep it under ${maxTtsChars} characters.`);
     return;
   }
 
@@ -311,20 +343,22 @@ async function processRecording() {
     recordStatusText.textContent = 'Ready to record';
     return;
   }
+  const blob = new Blob(audioChunks, { type: 'audio/webm;codecs=opus' });
+  await performTranscription(blob);
+}
 
+async function performTranscription(blob) {
   showStatus(statusBanner, 'loading', 'Transcribing audio…');
   recordStatusText.textContent = 'Transcribing…';
 
   try {
-    // Convert blob to base64
-    const blob = new Blob(audioChunks, { type: 'audio/webm;codecs=opus' });
     const base64Audio = await blobToBase64(blob);
 
     const response = await chrome.runtime.sendMessage({
       action: 'STT_TRANSCRIBE',
       payload: {
         audioBase64: base64Audio,
-        mimeType: 'audio/webm;codecs=opus',
+        mimeType: blob.type || 'audio/webm;codecs=opus',
         language: sttLanguage.value,
       },
     });
@@ -345,33 +379,31 @@ async function processRecording() {
   } catch (err) {
     let friendlyMsg = '';
     switch (err.status) {
-          case 'PERMISSION_DENIED':
-            friendlyMsg = 'Permission denied: Please ensure the Cloud Speech-to-Text API is enabled for your project.';
-            break;
-          case 'UNAUTHENTICATED':
-            friendlyMsg = 'Authentication error: Your Google Cloud API key or credentials are invalid.';
-            break;
-          case 'INVALID_ARGUMENT':
-            friendlyMsg = 'Invalid request: Check your audio settings (needs mono, 16-bit) and ensure audio is under 1 minute.';
-            // Retain a specific check for length since it's common
-            if (err.message.toLowerCase().includes('sync input too long')) {
-              friendlyMsg = 'Audio too long: Speech-to-Text only supports up to 1 minute of audio.';
-            }
-            break;
-          case "RESOURCE_EXHAUSTED":
-            friendlyMsg = 'Quota/Limit exceeded: You have reached your API usage limit or the file is too large.';
-            break;
-          case "DEADLINE_EXCEEDED":
-          case "UNAVAILABLE":
-            friendlyMsg = 'Service unavailable: The Google Cloud STT service is currently unavailable or timed out.';
-            break;
-          default:
-            // Fallback for any other specific cases not caught by status alone
-            if (err.message.toLowerCase().includes('quota exceeded')) {
-              friendlyMsg = 'Quota exceeded: You have reached your Google Cloud Speech-to-Text API usage limit.';
-            }
-            break;
+      case 'PERMISSION_DENIED':
+        friendlyMsg = 'Permission denied: Please ensure the Cloud Speech-to-Text API is enabled for your project.';
+        break;
+      case 'UNAUTHENTICATED':
+        friendlyMsg = 'Authentication error: Your Google Cloud API key or credentials are invalid.';
+        break;
+      case 'INVALID_ARGUMENT':
+        friendlyMsg = 'Invalid request: Check your audio settings (needs mono, 16-bit) and ensure audio is under 1 minute.';
+        if (err.message.toLowerCase().includes('sync input too long')) {
+          friendlyMsg = 'Audio too long: Speech-to-Text only supports up to 1 minute of audio.';
         }
+        break;
+      case "RESOURCE_EXHAUSTED":
+        friendlyMsg = 'Quota/Limit exceeded: You have reached your API usage limit or the file is too large.';
+        break;
+      case "DEADLINE_EXCEEDED":
+      case "UNAVAILABLE":
+        friendlyMsg = 'Service unavailable: The Google Cloud STT service is currently unavailable or timed out.';
+        break;
+      default:
+        if (err.message.toLowerCase().includes('quota exceeded')) {
+          friendlyMsg = 'Quota exceeded: You have reached your Google Cloud Speech-to-Text API usage limit.';
+        }
+        break;
+    }
 
     showStatus(statusBanner, 'error', friendlyMsg || 'STT error. Check your API key.');
     console.error('[STT] transcribe error:', err);
@@ -379,6 +411,27 @@ async function processRecording() {
     recordStatusText.textContent = 'Ready to record';
   }
 }
+
+// ─── Import Audio File ─────────────────────────────────────────────
+btnImportAudio.addEventListener('click', () => {
+  fileImportAudio.click();
+});
+
+fileImportAudio.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Clear input so the same file can be selected again
+  fileImportAudio.value = '';
+
+  // Max 50MB (arbitrary check)
+  if (file.size > 50 * 1024 * 1024) {
+    showStatus(statusBanner, 'error', 'File is too large. Max 50MB.');
+    return;
+  }
+
+  await performTranscription(file);
+});
 
 function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
@@ -438,7 +491,7 @@ function insertTextIntoPage(text) {
 
   if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
     const start = el.selectionStart ?? el.value.length;
-    const end   = el.selectionEnd   ?? el.value.length;
+    const end = el.selectionEnd ?? el.value.length;
     el.value = el.value.slice(0, start) + text + el.value.slice(end);
     el.selectionStart = el.selectionEnd = start + text.length;
     el.dispatchEvent(new Event('input', { bubbles: true }));
